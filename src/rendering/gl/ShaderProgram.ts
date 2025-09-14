@@ -27,8 +27,14 @@ class ShaderProgram {
   unifRef: WebGLUniformLocation;
   unifEye: WebGLUniformLocation;
   unifUp: WebGLUniformLocation;
-  unifDimensions: WebGLUniformLocation;
+  unifResolution: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+  unifModel: WebGLUniformLocation;
+  unifModelInvTr: WebGLUniformLocation;
+  unifViewProj: WebGLUniformLocation;
+  unifColor: WebGLUniformLocation;
+  unifView: WebGLUniformLocation;
+
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -45,8 +51,13 @@ class ShaderProgram {
     this.unifEye   = gl.getUniformLocation(this.prog, "u_Eye");
     this.unifRef   = gl.getUniformLocation(this.prog, "u_Ref");
     this.unifUp   = gl.getUniformLocation(this.prog, "u_Up");
-    this.unifDimensions   = gl.getUniformLocation(this.prog, "u_Dimensions");
     this.unifTime   = gl.getUniformLocation(this.prog, "u_Time");
+    this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");
+    this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
+    this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
+    this.unifView       = gl.getUniformLocation(this.prog, "u_View");
+    this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
+    this.unifResolution = gl.getUniformLocation(this.prog, "u_Resolution");
   }
 
   use() {
@@ -69,11 +80,46 @@ class ShaderProgram {
     }
   }
 
-  setDimensions(width: number, height: number) {
+  setResolution(width: number, height: number) {
     this.use();
-    if(this.unifDimensions !== -1) {
-      gl.uniform2f(this.unifDimensions, width, height);
+    if(this.unifResolution !== -1) {
+      gl.uniform2f(this.unifResolution, width, height);
     }
+  }
+
+  setModelMatrix(model: mat4) {
+      this.use();
+      if (this.unifModel !== -1) {
+          gl.uniformMatrix4fv(this.unifModel, false, model);
+      }
+
+      if (this.unifModelInvTr !== -1) {
+          let modelinvtr: mat4 = mat4.create();
+          mat4.transpose(modelinvtr, model);
+          mat4.invert(modelinvtr, modelinvtr);
+          gl.uniformMatrix4fv(this.unifModelInvTr, false, modelinvtr);
+      }
+  }
+
+  setViewProjMatrix(vp: mat4) {
+      this.use();
+      if (this.unifViewProj !== -1) {
+          gl.uniformMatrix4fv(this.unifViewProj, false, vp);
+      }
+  }
+
+  setViewMatrix(view: mat4) {
+      this.use();
+      if (this.unifView !== -1) {
+          gl.uniformMatrix4fv(this.unifView, false, view);
+      }
+  }
+
+  setColor(color: vec4) {
+      this.use();
+      if (this.unifColor !== -1) {
+          gl.uniform4fv(this.unifColor, color);
+      }
   }
 
   setTime(t: number) {

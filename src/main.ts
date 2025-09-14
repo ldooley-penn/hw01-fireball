@@ -6,6 +6,7 @@ import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
+import Icosphere from "./geometry/Icosphere";
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -15,11 +16,14 @@ const controls = {
 };
 
 let square: Square;
+let sphere: Icosphere;
 let time: number = 0;
 
 function loadScene() {
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
+  sphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, 2);
+  sphere.create();
   // time = 0;
 }
 
@@ -72,6 +76,11 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/flat-frag.glsl')),
   ]);
 
+  const lambert = new ShaderProgram([
+      new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
+      new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+  ])
+
   function processKeyPresses() {
     // Use this if you wish
   }
@@ -86,6 +95,12 @@ function main() {
     renderer.render(camera, flat, [
       square,
     ], time);
+
+    gl.disable(gl.DEPTH_TEST);
+    renderer.render(camera, lambert, [
+        sphere,
+    ], time);
+
     time++;
     // stats.end();
 
@@ -97,13 +112,15 @@ function main() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.setAspectRatio(window.innerWidth / window.innerHeight);
     camera.updateProjectionMatrix();
-    flat.setDimensions(window.innerWidth, window.innerHeight);
+    flat.setResolution(window.innerWidth, window.innerHeight);
+    lambert.setResolution(window.innerWidth, window.innerHeight);
   }, false);
 
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.setAspectRatio(window.innerWidth / window.innerHeight);
   camera.updateProjectionMatrix();
-  flat.setDimensions(window.innerWidth, window.innerHeight);
+  flat.setResolution(window.innerWidth, window.innerHeight);
+  lambert.setResolution(window.innerWidth, window.innerHeight);
 
   // Start the render loop
   tick();

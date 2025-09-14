@@ -23,12 +23,22 @@ class OpenGLRenderer {
   }
 
   render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, time: number) {
-    prog.setEyeRefUp(camera.controls.eye, camera.controls.center, camera.controls.up);
-    prog.setTime(time);
+      let model = mat4.create();
+      let viewProj = mat4.create();
+      let color = vec4.fromValues(1, 0, 0, 1);
 
-    for (let drawable of drawables) {
-      prog.draw(drawable);
-    }
+      mat4.identity(model);
+      mat4.multiply(viewProj, camera.projectionMatrix, camera.viewMatrix);
+      prog.setModelMatrix(model);
+      prog.setViewProjMatrix(viewProj);
+      prog.setViewMatrix(camera.viewMatrix);
+      prog.setEyeRefUp(camera.controls.eye, camera.controls.center, camera.controls.up);
+      prog.setTime(time);
+      prog.setColor(color);
+
+      for (let drawable of drawables) {
+          prog.draw(drawable);
+      }
   }
 };
 
