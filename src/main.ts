@@ -22,9 +22,8 @@ let time: number = 0;
 function loadScene() {
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
-  sphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, 2);
+  sphere = new Icosphere(vec3.fromValues(0, 0, 0), 3, 5);
   sphere.create();
-  // time = 0;
 }
 
 function main() {
@@ -76,9 +75,9 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/flat-frag.glsl')),
   ]);
 
-  const lambert = new ShaderProgram([
-      new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-      new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+  const fireball = new ShaderProgram([
+      new Shader(gl.VERTEX_SHADER, require('./shaders/fireball-vert.glsl')),
+      new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
   ])
 
   function processKeyPresses() {
@@ -92,12 +91,14 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     processKeyPresses();
+
+
     renderer.render(camera, flat, [
       square,
     ], time);
 
-    gl.disable(gl.DEPTH_TEST);
-    renderer.render(camera, lambert, [
+
+    renderer.render(camera, fireball, [
         sphere,
     ], time);
 
@@ -113,14 +114,12 @@ function main() {
     camera.setAspectRatio(window.innerWidth / window.innerHeight);
     camera.updateProjectionMatrix();
     flat.setResolution(window.innerWidth, window.innerHeight);
-    lambert.setResolution(window.innerWidth, window.innerHeight);
   }, false);
 
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.setAspectRatio(window.innerWidth / window.innerHeight);
   camera.updateProjectionMatrix();
   flat.setResolution(window.innerWidth, window.innerHeight);
-  lambert.setResolution(window.innerWidth, window.innerHeight);
 
   // Start the render loop
   tick();
