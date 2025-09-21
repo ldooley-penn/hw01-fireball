@@ -10,4 +10,8 @@ out vec4 out_Col;
 
 void main() {
   out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.5 * (sin(u_Time * 3.14159 * 0.01) + 1.0), 1.0);
+  vec3 colorA = vec3(1.f, 0.f, 0.f);
+  vec3 colorB = vec3(0.f, 0.f, 0.f);
+  vec3 outCol3 = mix(colorA, colorB, fs_Pos.y);
+  out_Col = vec4(outCol3, 1.f);
 }

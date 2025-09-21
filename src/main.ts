@@ -17,6 +17,8 @@ const controls = {
 
 let square: Square;
 let sphere: Icosphere;
+let eye1: Icosphere;
+let eye2: Icosphere;
 let time: number = 0;
 
 function loadScene() {
@@ -24,6 +26,10 @@ function loadScene() {
   square.create();
   sphere = new Icosphere(vec3.fromValues(0, 0, 0), 3, 5);
   sphere.create();
+  eye1 = new Icosphere(vec3.fromValues(1, 2, 1), 0.25, 2);
+  eye1.create();
+  eye2 = new Icosphere(vec3.fromValues(1, 2, -1), 0.25, 2);
+  eye2.create();
 }
 
 function main() {
@@ -80,6 +86,11 @@ function main() {
       new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
   ])
 
+    const eye = new ShaderProgram([
+        new Shader(gl.VERTEX_SHADER, require('./shaders/eye-vert.glsl')),
+        new Shader(gl.FRAGMENT_SHADER, require('./shaders/eye-frag.glsl')),
+    ])
+
   function processKeyPresses() {
     // Use this if you wish
   }
@@ -100,6 +111,11 @@ function main() {
 
     renderer.render(camera, fireball, [
         sphere,
+    ], time);
+
+    renderer.render(camera, eye, [
+        eye1,
+        eye2
     ], time);
 
     time++;
