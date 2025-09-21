@@ -26,9 +26,9 @@ function loadScene() {
   square.create();
   sphere = new Icosphere(vec3.fromValues(0, 0, 0), 3, 5);
   sphere.create();
-  eye1 = new Icosphere(vec3.fromValues(1, 2, 1), 0.25, 2);
+  eye1 = new Icosphere(vec3.fromValues(1.75, 2, 1), 0.25, 2);
   eye1.create();
-  eye2 = new Icosphere(vec3.fromValues(1, 2, -1), 0.25, 2);
+  eye2 = new Icosphere(vec3.fromValues(1.75, 2, -1), 0.25, 2);
   eye2.create();
 }
 

@@ -77,17 +77,76 @@ float triangleWave(float x)
     return 2.f * abs(x - floor(x + 0.5));
 }
 
-vec3 displaceVertex(vec3 inVertex)
+// Credit to https://www.ronja-tutorials.com/post/024-white-noise/
+float random3x1(vec3 pos, vec3 seedVector) {
+    vec3 smallValue = sin(pos);
+    float value = dot(smallValue, seedVector);
+    value = fract(sin(value) * 143758.5453);
+    // Remap from [-1, 1] to [0, 1]
+    value = (value + 1.f)/2.f;
+    return value;
+}
+
+vec3 random3x3(vec3 pos){
+    return vec3(
+        random3x1(pos, vec3(12.989, 78.233, 37.719)),
+        random3x1(pos, vec3(39.346, 11.135, 83.155)),
+        random3x1(pos, vec3(73.156, 52.235, 09.151))
+    );
+}
+
+float noise(vec3 pos, float scale) {
+    vec3 scaledPos = pos/scale;
+    vec3 originalCell = floor(scaledPos);
+
+    float minDistance = 100.f;
+    for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+            for(int dz = -1; dz < 2; dz++) {
+                vec3 dCell = vec3(float(dx), float(dy), float(dz));
+                vec3 currentCell = originalCell + dCell;
+
+                vec3 currentCellVoronoiCenter = currentCell + random3x3(currentCell);
+                minDistance = min(minDistance, distance(currentCellVoronoiCenter, scaledPos));
+            }
+        }
+    }
+
+    return minDistance;
+}
+
+float noiseFBM(vec3 pos, float initialScale, float persistence, float lacunarity, int levels, vec3 displacementDirection, float )
+{
+    float noiseValue = 0.f;
+    float amplitude = 1.f;
+    float scale = initialScale;
+
+    for(int i = 0; i<levels; i++){
+        vec3 shiftedPosition = pos + displacementDirection * u_Time * 0.005 * float(i + 1);
+        noiseValue += amplitude * noise(shiftedPosition, scale);
+        scale *= lacunarity;
+        amplitude *= persistence;
+    }
+
+    noiseValue = smoothstep(0.f, 1.f, 1.f - noiseValue);
+    return noiseValue;
+}
+
+vec3 displaceVertex(vec3 inVertex, vec3 inNormal)
 {
     float amplitude = 1.f + 0.1 * sin(u_Time * 0.05);
 
-    inVertex.y += (3.f + amplitude) * cos(inVertex.x * 0.5) * cos(inVertex.y * 0.5);
+    vec3 outVertex = inVertex;
 
-    //float earXOffset = ease(abs(inVertex.y), 0.f, 1.f, 1.f);
+    outVertex.y += (3.f + amplitude) * cos(inVertex.x * 0.5) * cos(inVertex.y * 0.5);
 
-    inVertex.x -= 0.5 * (inVertex.y + 1.f);
+    outVertex.x -= 0.5 * (inVertex.y + 1.f);
+    //vec3 noiseShift = vec3(0.f, -1.f, 0.5f) * u_Time * 0.01;
+    float noiseMultiplier = 1.f;
+    float noiseValue = noiseMultiplier * (noiseFBM(inVertex, 2.f, 0.25f, 0.5f, 2, vec3(0.f, -1.f, 0.5f)) - 0.5f);
+    outVertex += inNormal * noiseValue;
 
-    return inVertex;
+    return outVertex;
 }
 
 void main()
@@ -95,7 +154,7 @@ void main()
     mat3 invTranspose = mat3(u_ModelInvTr);
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);
 
-    fs_Pos = u_Model * vec4(displaceVertex(vs_Pos.xyz), vs_Pos.w);
+    fs_Pos = u_Model * vec4(displaceVertex(vs_Pos.xyz, vs_Nor.xyz), vs_Pos.w);
 
     gl_Position = u_ViewProj * fs_Pos;
 }
