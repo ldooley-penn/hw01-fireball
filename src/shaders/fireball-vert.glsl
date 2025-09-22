@@ -4,6 +4,8 @@ uniform mat4 u_Model;
 uniform mat4 u_ModelInvTr;
 uniform mat4 u_ViewProj;
 uniform float u_Time;
+uniform vec4 u_Color;
+uniform float u_Radius;
 
 in vec4 vs_Pos;
 in vec4 vs_Nor;
@@ -115,17 +117,19 @@ float noise(vec3 pos, float scale) {
     return minDistance;
 }
 
-float noiseFBM(vec3 pos, float initialScale, float persistence, float lacunarity, int levels, vec3 displacementDirection, float )
+float noiseFBM(vec3 pos, float initialScale, vec3 displacementDirection, float initialSpeed, float persistence, float lacunarity, float speedFactor, int levels)
 {
     float noiseValue = 0.f;
     float amplitude = 1.f;
     float scale = initialScale;
+    float speed = initialSpeed;
 
     for(int i = 0; i<levels; i++){
-        vec3 shiftedPosition = pos + displacementDirection * u_Time * 0.005 * float(i + 1);
+        vec3 shiftedPosition = pos + displacementDirection * u_Time * speed;
         noiseValue += amplitude * noise(shiftedPosition, scale);
         scale *= lacunarity;
         amplitude *= persistence;
+        speed *= speedFactor;
     }
 
     noiseValue = smoothstep(0.f, 1.f, 1.f - noiseValue);
@@ -134,17 +138,21 @@ float noiseFBM(vec3 pos, float initialScale, float persistence, float lacunarity
 
 vec3 displaceVertex(vec3 inVertex, vec3 inNormal)
 {
-    float amplitude = 1.f + 0.1 * sin(u_Time * 0.05);
+    float earVibration = 0.2 * sin(u_Time * 0.05);
 
     vec3 outVertex = inVertex;
 
-    outVertex.y += (3.f + amplitude) * cos(inVertex.x * 0.5) * cos(inVertex.y * 0.5);
+    // Create ears shape
+    outVertex.y += (u_Radius + earVibration) * cos(inVertex.x / (3.f * 0.5)) * cos(inVertex.y / (u_Radius * 0.5));
 
-    outVertex.x -= 0.5 * (inVertex.y + 1.f);
-    //vec3 noiseShift = vec3(0.f, -1.f, 0.5f) * u_Time * 0.01;
-    float noiseMultiplier = 1.f;
-    float noiseValue = noiseMultiplier * (noiseFBM(inVertex, 2.f, 0.25f, 0.5f, 2, vec3(0.f, -1.f, 0.5f)) - 0.5f);
+    // Push ears back
+    outVertex.x += ease(inVertex.y + u_Radius, 0.f, -3.f, u_Radius * 2.f);
+    //outVertex.x -= 0.5 * (inVertex.y + 0.f);
+    float noiseMultiplier = 0.3f * u_Radius;
+    float noiseValue = noiseMultiplier * (noiseFBM(inVertex, 2.f, vec3(0.f, -1.f, 0.5f), 0.01f, 0.25f, 0.5f, 2.f, 2) - 0.5f);
     outVertex += inNormal * noiseValue;
+
+
 
     return outVertex;
 }
@@ -155,6 +163,8 @@ void main()
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);
 
     fs_Pos = u_Model * vec4(displaceVertex(vs_Pos.xyz, vs_Nor.xyz), vs_Pos.w);
+
+    fs_Col = u_Color;
 
     gl_Position = u_ViewProj * fs_Pos;
 }

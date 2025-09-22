@@ -1,4 +1,4 @@
-import {vec2, vec3} from 'gl-matrix';
+import {vec2, vec3, vec4} from 'gl-matrix';
 // import * as Stats from 'stats-js';
 // import * as DAT from 'dat-gui';
 import Square from './geometry/Square';
@@ -17,6 +17,9 @@ const controls = {
 
 let square: Square;
 let sphere: Icosphere;
+let sphereRadius: number = 3;
+let innerSphere: Icosphere;
+let innerSphereRadius: number = 2;
 let eye1: Icosphere;
 let eye2: Icosphere;
 let time: number = 0;
@@ -24,11 +27,13 @@ let time: number = 0;
 function loadScene() {
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
-  sphere = new Icosphere(vec3.fromValues(0, 0, 0), 3, 5);
+  sphere = new Icosphere(vec3.fromValues(0, 0, 0), sphereRadius, 5);
   sphere.create();
-  eye1 = new Icosphere(vec3.fromValues(1.75, 2, 1), 0.25, 2);
+  innerSphere = new Icosphere(vec3.fromValues(-0.4, -0.4, 0), innerSphereRadius, 5);
+  innerSphere.create();
+  eye1 = new Icosphere(vec3.fromValues(0.5, 1, 1), 0.25, 2);
   eye1.create();
-  eye2 = new Icosphere(vec3.fromValues(1.75, 2, -1), 0.25, 2);
+  eye2 = new Icosphere(vec3.fromValues(0.5, 1, -1), 0.25, 2);
   eye2.create();
 }
 
@@ -75,6 +80,8 @@ function main() {
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(164.0 / 255.0, 233.0 / 255.0, 1.0, 1);
   gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
   const flat = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/flat-vert.glsl')),
@@ -108,6 +115,15 @@ function main() {
       square,
     ], time);
 
+    fireball.setColor(vec4.fromValues(0, 0, 1, 1));
+    fireball.setRadius(innerSphereRadius);
+
+    renderer.render(camera, fireball, [
+        innerSphere
+    ], time);
+
+    fireball.setColor(vec4.fromValues(0, 1, 0, 0.5));
+    fireball.setRadius(sphereRadius);
 
     renderer.render(camera, fireball, [
         sphere,

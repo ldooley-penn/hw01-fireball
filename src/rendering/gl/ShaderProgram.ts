@@ -32,6 +32,7 @@ class ShaderProgram {
     unifTime: WebGLUniformLocation;
     unifResolution: WebGLUniformLocation;
     unifView: WebGLUniformLocation;
+    unifRadius: WebGLUniformLocation;
 
     constructor(shaders: Array<Shader>) {
         this.prog = gl.createProgram();
@@ -54,6 +55,7 @@ class ShaderProgram {
         this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
         this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
         this.unifResolution = gl.getUniformLocation(this.prog, "u_Resolution");
+        this.unifRadius     = gl.getUniformLocation(this.prog, "u_Radius");
     }
 
     use() {
@@ -109,6 +111,13 @@ class ShaderProgram {
         this.use();
         if(this.unifColor !== -1){
             gl.uniform4fv(this.unifColor, color);
+        }
+    }
+
+    setRadius(radius: number){
+        this.use();
+        if(this.unifRadius !== -1){
+            gl.uniform1f(this.unifRadius, radius);
         }
     }
 
