@@ -33,6 +33,10 @@ class ShaderProgram {
     unifResolution: WebGLUniformLocation;
     unifView: WebGLUniformLocation;
     unifRadius: WebGLUniformLocation;
+    unifOctaves: WebGLUniformLocation;
+    unifInitialNoiseScale: WebGLUniformLocation;
+    unifLacunarity: WebGLUniformLocation;
+    unifPersistence: WebGLUniformLocation;
 
     constructor(shaders: Array<Shader>) {
         this.prog = gl.createProgram();
@@ -56,6 +60,10 @@ class ShaderProgram {
         this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
         this.unifResolution = gl.getUniformLocation(this.prog, "u_Resolution");
         this.unifRadius     = gl.getUniformLocation(this.prog, "u_Radius");
+        this.unifOctaves    = gl.getUniformLocation(this.prog, "u_Octaves");
+        this.unifInitialNoiseScale = gl.getUniformLocation(this.prog, "u_InitialNoiseScale");
+        this.unifLacunarity = gl.getUniformLocation(this.prog, "u_Lacunarity");
+        this.unifPersistence = gl.getUniformLocation(this.prog, "u_Persistence");
     }
 
     use() {
@@ -118,6 +126,34 @@ class ShaderProgram {
         this.use();
         if(this.unifRadius !== -1){
             gl.uniform1f(this.unifRadius, radius);
+        }
+    }
+
+    setOctaves(octaves: number){
+        this.use();
+        if(this.unifOctaves !== -1){
+            gl.uniform1i(this.unifOctaves, octaves);
+        }
+    }
+
+    setInitialNoiseScale(scale: number){
+        this.use();
+        if(this.unifInitialNoiseScale !== -1){
+            gl.uniform1f(this.unifInitialNoiseScale, scale);
+        }
+    }
+
+    setLacunarity(lacunarity: number){
+        this.use();
+        if(this.unifLacunarity !== -1){
+            gl.uniform1f(this.unifLacunarity, lacunarity);
+        }
+    }
+
+    setPersistence(persistence: number){
+        this.use();
+        if(this.unifPersistence !== -1){
+            gl.uniform1f(this.unifPersistence, persistence);
         }
     }
 

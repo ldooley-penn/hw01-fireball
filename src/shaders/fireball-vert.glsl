@@ -6,6 +6,10 @@ uniform mat4 u_ViewProj;
 uniform float u_Time;
 uniform vec4 u_Color;
 uniform float u_Radius;
+uniform int u_Octaves;
+uniform float u_InitialNoiseScale;
+uniform float u_Lacunarity;
+uniform float u_Persistence;
 
 in vec4 vs_Pos;
 in vec4 vs_Nor;
@@ -127,8 +131,8 @@ float noiseFBM(vec3 pos, float initialScale, vec3 displacementDirection, float i
     for(int i = 0; i<levels; i++){
         vec3 shiftedPosition = pos + displacementDirection * u_Time * speed;
         noiseValue += amplitude * noise(shiftedPosition, scale);
-        scale *= lacunarity;
-        amplitude *= persistence;
+        scale *= u_Lacunarity;
+        amplitude *= u_Persistence;
         speed *= speedFactor;
     }
 
@@ -149,7 +153,7 @@ vec3 displaceVertex(vec3 inVertex, vec3 inNormal)
     outVertex.x += ease(inVertex.y + u_Radius, 0.f, -3.f, u_Radius * 2.f);
     //outVertex.x -= 0.5 * (inVertex.y + 0.f);
     float noiseMultiplier = 0.3f * u_Radius;
-    float noiseValue = noiseMultiplier * (noiseFBM(inVertex, 2.f, vec3(0.f, -1.f, 0.5f), 0.01f, 0.25f, 0.5f, 2.f, 2) - 0.5f);
+    float noiseValue = noiseMultiplier * (noiseFBM(inVertex, u_InitialNoiseScale, vec3(0.f, -1.f, 0.5f), 0.01f, 0.25f, 0.5f, 2.f, u_Octaves) - 0.5f);
     outVertex += inNormal * noiseValue;
 
 
