@@ -17,7 +17,7 @@ const controls = {
     'InnerColor': '#0000ff',
     'Octaves': 3,
     'Initial Noise Scale': 2,
-    'Lacunarity': 0.5,
+    'Lacunarity': 0.4,
     'Persistence': 0.3,
 };
 
@@ -31,7 +31,7 @@ let persistenceControl : GUIController<object>;
 
 let prevOctaves = 3;
 let prevInitialNoiseScale = 2;
-let prevLacunarity = 0.5;
+let prevLacunarity = 0.4;
 let prevPersistence = 0.3;
 
 let square: Square;
@@ -61,7 +61,7 @@ function reset() {
     innerColorControl.setValue('#0000ff');
     octavesControl.setValue(3);
     initialNoiseScaleControl.setValue(2);
-    lacunarityControl.setValue(0.5);
+    lacunarityControl.setValue(0.4);
     persistenceControl.setValue(0.3);
 }
 

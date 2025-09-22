@@ -17,6 +17,7 @@ in vec4 vs_Nor;
 out vec4 fs_Pos;
 out vec4 fs_Nor;
 out vec4 fs_Col;
+out float fs_Displacement;
 
 float ease(float time, float start, float end, float duration)
 {
@@ -27,60 +28,6 @@ float ease(float time, float start, float end, float duration)
         return end;
     }
     return end * (time / duration) + start;
-}
-
-float inQuadratic(float time){
-    return time * time;
-}
-
-float outQuadratic(float time)
-{
-    return 1.f - inQuadratic(1.f - time);
-}
-
-float inOutQuadratic(float time)
-{
-    if(time < 0.5){
-        return inQuadratic(time * 2.f) / 2.f;
-    }
-    return 1.f - inQuadratic((1.f - time) * 2.f)/2.f;
-}
-
-float bias(float b, float time)
-{
-    if(time < 0.f)
-    {
-        return 0.f;
-    }
-    if(time > 1.f)
-    {
-        return 1.f;
-    }
-    return pow(time, log(b) / log(0.5f));
-}
-
-float gain(float g, float time)
-{
-    if(time < 0.5f)
-    {
-        return bias(1.f - g, 2.f * time) / 2.f;
-    }
-    return 1.f - bias(1.f - g, 2.f - 2.f * time) / 2.f;
-}
-
-float squareWave(float x)
-{
-    return abs(floor(mod(x, 2.f)));
-}
-
-float sawtoothWave(float x)
-{
-    return x - floor(x);
-}
-
-float triangleWave(float x)
-{
-    return 2.f * abs(x - floor(x + 0.5));
 }
 
 // Credit to https://www.ronja-tutorials.com/post/024-white-noise/
@@ -154,9 +101,8 @@ vec3 displaceVertex(vec3 inVertex, vec3 inNormal)
     //outVertex.x -= 0.5 * (inVertex.y + 0.f);
     float noiseMultiplier = 0.3f * u_Radius;
     float noiseValue = noiseMultiplier * (noiseFBM(inVertex, u_InitialNoiseScale, vec3(0.f, -1.f, 0.5f), 0.01f, 0.25f, 0.5f, 2.f, u_Octaves) - 0.5f);
+    fs_Displacement = noiseValue;
     outVertex += inNormal * noiseValue;
-
-
 
     return outVertex;
 }
