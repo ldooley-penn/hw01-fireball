@@ -60,6 +60,6 @@ void main()
     float pulsingTime = gain(0.8f, oscillator);
     float mappedDisplacement = smootherstep(-2.f, 4.f, fs_Displacement + pulsingTime);
     // This creates a dusty appearance that looks like streaks
-    vec3 blendedColor = mix(fs_Col.xyz, vec3(1.f), mappedDisplacement);
+    vec3 blendedColor = mix(mix(fs_Col.xyz, vec3(0.f), mappedDisplacement), vec3(1.f), 0.2f - mappedDisplacement);
     out_Col = vec4(blendedColor, fs_Col.w);
 }
